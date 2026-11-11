@@ -5,7 +5,7 @@ from urllib.parse import urlparse
 
 from paths import app_data_dir
 
-from PySide6.QtCore import Qt, Signal
+from PySide6.QtCore import Qt, QSize, Signal
 from PySide6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QLineEdit,
     QPushButton, QListWidget, QListWidgetItem,
@@ -83,25 +83,37 @@ class FavoritesPanel(QWidget):
         self.setMinimumWidth(240)
 
         layout = QVBoxLayout(self)
-        layout.addWidget(QLabel("收藏名称"))
+        layout.setContentsMargins(14, 12, 14, 14)
+        layout.setSpacing(8)
+
+        name_label = QLabel("收藏名称")
+        link_label = QLabel("直播间链接")
+        hint = QLabel("双击一条即可填入并打开")
+        for label in (name_label, link_label, hint):
+            label.setObjectName("fieldLabel")
+
+        layout.addWidget(name_label)
         self.name_edit = QLineEdit()
         self.name_edit.setPlaceholderText("例如：常看的主播")
         layout.addWidget(self.name_edit)
 
-        layout.addWidget(QLabel("直播间链接"))
+        layout.addWidget(link_label)
         self.url_edit = QLineEdit()
         self.url_edit.setPlaceholderText("https://...")
         layout.addWidget(self.url_edit)
 
         actions = QHBoxLayout()
+        actions.setSpacing(6)
         self.add_button = QPushButton("添加")
         self.open_button = QPushButton("打开")
         self.delete_button = QPushButton("删除")
+        self.add_button.setObjectName("primaryButton")
+        self.delete_button.setObjectName("dangerButton")
         for button in (self.add_button, self.open_button, self.delete_button):
             actions.addWidget(button)
         layout.addLayout(actions)
 
-        layout.addWidget(QLabel("双击直播间即可打开"))
+        layout.addWidget(hint)
         self.list_widget = QListWidget()
         layout.addWidget(self.list_widget, 1)
 
@@ -126,6 +138,7 @@ class FavoritesPanel(QWidget):
         for favorite_id, platform, name, url in records:
             item = QListWidgetItem(f"[{platform}] {name}\n{url}")
             item.setData(Qt.ItemDataRole.UserRole, (favorite_id, url))
+            item.setSizeHint(QSize(240, 52))
             self.list_widget.addItem(item)
 
     def add_favorite(self):
